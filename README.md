@@ -6,7 +6,7 @@
 
 ## Install:
 
-    npm install bbgurl
+    npm install bbgurl -g
 
 ## Usage:
 
