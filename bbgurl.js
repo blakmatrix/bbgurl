@@ -5,11 +5,13 @@ var optimist = require('optimist'),
     path = require('path'),
     util = require('util'),
     url = require('url'),
+    Stream = require('stream'),
     argv,
     _logref, _logfile, log,
     request,
     uri,
-    output;
+    output,
+    prettyPipe;
 
 // Parse arguments.
 argv = optimist
@@ -35,6 +37,7 @@ argv = optimist
     },
     'headers': {
       alias: 'H',
+      default: {},
       describe: 'A JSON representation of any headers.'
     },
     'logfile': {
@@ -47,12 +50,13 @@ argv = optimist
     },
     'output': {
       alias: 'o',
-      describe: 'HTTP response output file (default stdout)'
+      describe: 'HTTP response output file (stdout if not specified)'
     },
     'pretty': {
       alias: 'p',
+      default: false,
       boolean: true,
-      describe: 'attempts to pretify the output'
+      describe: 'Attempt to reformat JSON chunks in a human-readable format'
     },
     'strictSSL': {
       default: false,
@@ -123,7 +127,7 @@ request = require('request');
 
 // Handle the uri argument, attach to argv.
 uri = url.parse(argv.uri || argv._.join(' '));
-if(!uri.protocol){
+if (!uri.protocol) {
   uri = url.parse('http://' + uri.href);
 }
 
@@ -148,26 +152,22 @@ if (argv.headers) {
     argv.headers = {};
   }
 }
-// Meat and potatoes.
-if(argv.pretty) {
-  var stream = require('stream');
-  var writestream = new stream.Stream();
-  writestream.writable = true;
 
-  writestream.write = function (data) {
-    try {
-      output.write(JSON.stringify(JSON.parse(data.toString()), null, 2));
-    } catch(ex) {
-      output.write(data);
-    }
+// Shim stream for prettifying json
+prettyPipe = new Stream();
+prettyPipe.writable = true;
+prettyPipe.write = function (data) {
+  try {
+    output.write(JSON.stringify(JSON.parse(data.toString()), null, 2));
+  } catch(ex) {
+    output.write(data);
+  }
 
-    return true;
-  };
+  return true;
+};
+prettyPipe.end = function (data) {
+  output.write('\n');
+};
 
-  writestream.end = function (data) {
-    output.write('\n');
-  };
-  request(argv).pipe(writestream);
-} else {
-  request(argv).pipe(output);
-}
+// meat and potatoes.
+request(argv).pipe(argv.pretty ? prettyPipe : output);
