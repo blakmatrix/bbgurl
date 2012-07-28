@@ -60,7 +60,9 @@ $ bbgurl -u josh:supersekritpw http://localhost:8080
 
 ```
 $ bbgurl --verbose http://nodejs.org/dist/v0.8.4/node-v0.8.4.tar.gz -o node-v0.8.4.tar.gz
-[request] GET http://nodejs.org/dist/v0.8.4/node-v0.8.4.tar.gz
+[bbgurl] Downloading: (♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥) 100% (90.34MB/90.34MB)                    
+
+[bbgurl] Data written to /home/josh/dev/bbgurl/node-v0.8.4.tar.gz
 $ tar -xzf node-v0.8.4.tar.gz 
 $ cd node-v0.8.4/
 $ ls
