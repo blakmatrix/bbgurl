@@ -2,7 +2,7 @@
   "author": "Joshua Holbrook <josh.holbrook@gmail.com> (http://jesusabdullah.net)",
   "name": "bbgurl",
   "description": "bbgurl: A tiny cli http client; a thin wrapper around mikeal/request. Named by @blakmatrix.",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "homepage": "https://github.com/jesusabdullah/bbgurl",
   "repository": {
     "url": "git@github.com:jesusabdullah/bbgurl.git"
