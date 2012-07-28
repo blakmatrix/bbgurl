@@ -7,13 +7,17 @@ var optimist = require('optimist'),
     util = require('util'),
     url = require('url'),
     Stream = require('stream'),
+    streamspeed = require('streamspeed'),
+    Speedometer = require('./node_modules/streamspeed/lib/speedometer.js'),
+    multimeter = require('multimeter'),
     argv,
     _logref, _logfile, log,
     request,
     uri,
     output,
     prettyPipe,
-    req;
+    req,
+    speedometer, expected;
 
 // Parse arguments.
 argv = optimist
@@ -39,7 +43,6 @@ argv = optimist
     },
     'headers': {
       alias: 'H',
-      default: {},
       describe: 'A JSON representation of any headers.'
     },
     'include': {
@@ -177,15 +180,120 @@ prettyPipe.end = function (data) {
   output.write('\n');
 };
 
+//
 // meat and potatoes.
+//
 req = request(argv);
 req.pipe(argv.pretty ? prettyPipe : output);
+
+// Print saved location.
+if (argv.output) {
+  output.on('close', function () {
+    log('[bbgurl] Data written to %s', path.resolve(argv.output));
+  });
+}
+
+// In verbose mode, show the download bar.
+if (argv.verbose) {
+  // Use the speedometer directly so that we may get at the total.
+  speedometer = new Speedometer();
+
+  req.on('response', function (response) {
+    expected = response.headers['content-length'] * 8;
+  });
+
+  // Create a progress bar.
+  createBar({
+    width: 30,
+    before: '[bbgurl] Downloading: (',
+    after: ') ',
+    solid: {
+      background: null,
+      foreground: 'magenta',
+      text: '♥'
+    },
+    empty: {
+      background: null,
+      foreground: null,
+      text: ' '
+    }
+  }, function (bar, done) {
+
+    req.on('data', function (data) {
+      speedometer.update(data, null, function (bps, avg) {
+        var percentage = expected
+          ? speedometer.total / expected
+          : 0
+        ;
+
+        if (
+          (percentage < 0) ||
+          (percentage > 100) ||
+          isNaN(percentage)
+        ) {
+          percentage = 0;
+        }
+
+        percentage = Math.floor(percentage * 10) / 10;
+
+        bar.percent(percentage, util.format(
+          '%d% (%s/%s, %s/sec)',
+           percentage,
+           streamspeed.toHuman(speedometer.total),
+           streamspeed.toHuman(expected),
+           streamspeed.toHuman(bps)
+        ));
+
+      });
+    });
+    req.on('end', function () {
+      // Set the bar to 100%.
+      bar.percent(100, util.format(
+        '100% (%s/%s)                    ',
+         streamspeed.toHuman(expected),
+         streamspeed.toHuman(expected)
+      ));
+
+      done(function (err) {
+        if (err) {
+          throw err;
+        }
+      });
+    });
+  });
+
+  // Creates a progress bar.
+  function createBar(opts, cb) {
+    process.stdin.setRawMode(true);
+    var multi = multimeter(process.stdin, process.stderr);
+    multi.charm.cursor(false);
+    multi.drop(opts, function (bar) {
+      cb(bar, cleanup(multi));
+    });
+    multi.charm.on('^C', cleanup(multi));
+  }
+
+  // Destroys the progress bar of the moment.
+  function cleanup(multi) {
+    return function done(cb) {
+      multi.charm.cursor(true);
+      multi.charm.display('reset');
+      process.stdin.setRawMode(false);
+      multi.write('\n').destroy();
+      if (cb) {
+        cb();
+      }
+    }
+  }
+
+}
 
 // if --include, print the response headers.
 // I couldn't actually find the raw response headers,
 // so I do some finagling to rebuild them here.
 if (argv.include) {
   req.on('response', function (res) {
+
     write('HTTP/%s %d %s',
       res.httpVersion,
       res.statusCode,
