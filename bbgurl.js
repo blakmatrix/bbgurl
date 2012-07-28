@@ -49,6 +49,11 @@ argv = optimist
       alias: 'o',
       describe: 'HTTP response output file (default stdout)'
     },
+    'pretty': {
+      alias: 'p',
+      boolean: true,
+      describe: 'attempts to pretify the output'
+    },
     'strictSSL': {
       default: false,
       boolean: true,
@@ -141,4 +146,25 @@ if (argv.headers) {
   }
 }
 // Meat and potatoes.
-request(argv).pipe(output);
+if(argv.pretty) {
+  var stream = require('stream');
+  var writestream = new stream.Stream();
+  writestream.writable = true;
+
+  writestream.write = function (data) {
+    try {
+      output.write(JSON.stringify(JSON.parse(data.toString()), null, 2));
+    } catch(ex) {
+      output.write(data);
+    }
+
+    return true;
+  };
+
+  writestream.end = function (data) {
+    output.write('\n');
+  };
+  request(argv).pipe(writestream);
+} else {
+  request(argv).pipe(output);
+}

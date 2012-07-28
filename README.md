@@ -24,6 +24,7 @@ Options:
   --logfile             Optional file to write logs to.                    
   --method, -X          HTTP method.                                         [default: "GET"]
   --output, -o          HTTP response output file (default stdout)         
+  --pretty, -p          Pretty prints json responses
   --strictSSL           Require that SSL certificates be valid.              [boolean]  [default: false]
   --user, -u            Specify basic auth credentials (ex: `-u user:pass`)
   --verbose, -v         Output logs to stderr.                               [boolean]
