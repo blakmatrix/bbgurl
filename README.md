@@ -14,13 +14,14 @@
 $ bbgurl 
 bbgurl: A tiny cli http client; a thin wrapper around mikeal/request. Named by @blakmatrix.
 
-USAGE: bbgurl <url> [<options>]
+USAGE: node ./bbgurl.js <url> [<options>]
 
 Options:
   --body, -d            String body for http request.                             
   --followRedirect      Follow the first http 30x redirect (if any).                [boolean]  [default: true]
   --followAllRedirects  Follow *all* http 30x redirects (if any).                   [boolean]  [default: false]
   --headers, -H         A JSON representation of any headers.                       [default: {}]
+  --include, -i         Print the request headers.                                  [boolean]  [default: false]
   --logfile             Optional file to write logs to.                           
   --method, -X          HTTP method.                                                [default: "GET"]
   --output, -o          HTTP response output file (stdout if not specified)       
