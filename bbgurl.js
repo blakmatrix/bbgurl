@@ -4,9 +4,11 @@ var optimist = require('optimist'),
     fs = require('fs'),
     path = require('path'),
     util = require('util'),
+    url = require('url'),
     argv,
     _logref, _logfile, log,
     request,
+    uri,
     output;
 
 // Parse arguments.
@@ -51,6 +53,10 @@ argv = optimist
       default: false,
       boolean: true,
       describe: 'Require that SSL certificates be valid.'
+    },
+    'user': {
+      alias: 'u',
+      describe: 'Specify basic auth credentials (ex: `-u user:pass`)'
     },
     'verbose': {
       alias: 'v',
@@ -110,13 +116,20 @@ process.logging = function (name) {
 // Finally, we may require request.
 request = require('request');
 
+// Handle the uri argument, attach to argv.
+uri = url.parse(argv.uri || argv._.join(' '));
+
+if (argv.user) {
+  uri.auth = argv.user;
+  delete argv.user;
+}
+
+argv.uri = uri;
+
 // Define the output stream.
 output = argv.output
   ? fs.createWriteStream(path.resolve(argv.output))
   : process.stdout;
-
-// With this small change we can use argv as the options hash.
-argv.uri = argv.uri || argv._.join(' ');
 
 if (argv.headers) {
   try {

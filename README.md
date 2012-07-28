@@ -12,20 +12,21 @@
 
 ```
 $ bbgurl
-bbgurl: A tiny cli http client; a thin wrapper of mikeal/request. Named by @blakmatrix.
+bbgurl: A tiny cli http client; a thin wrapper around mikeal/request. Named by @blakmatrix.
 
 USAGE: bbgurl <url> [<options>]
 
 Options:
-  --body, -d            String body for http request.               
-  --followRedirect      Follow the first http 30x redirect (if any).  [boolean]  [default: true]
-  --followAllRedirects  Follow *all* http 30x redirects (if any).     [boolean]  [default: false]
-  --headers, -H         A JSON representation of any headers.       
-  --logfile             Optional file to write logs to.             
-  --method, -X          HTTP method.                                  [default: "GET"]
-  --output, -o          HTTP response output file (default stdout)  
-  --strictSSL           Require that SSL certificates be valid.       [boolean]  [default: false]
-  --verbose, -v         Output logs to stderr.                        [boolean]
+  --body, -d            String body for http request.                      
+  --followRedirect      Follow the first http 30x redirect (if any).         [boolean]  [default: true]
+  --followAllRedirects  Follow *all* http 30x redirects (if any).            [boolean]  [default: false]
+  --headers, -H         A JSON representation of any headers.              
+  --logfile             Optional file to write logs to.                    
+  --method, -X          HTTP method.                                         [default: "GET"]
+  --output, -o          HTTP response output file (default stdout)         
+  --strictSSL           Require that SSL certificates be valid.              [boolean]  [default: false]
+  --user, -u            Specify basic auth credentials (ex: `-u user:pass`)
+  --verbose, -v         Output logs to stderr.                               [boolean]
 
 Argument check failed: Must specify a uri.
 ```
@@ -44,6 +45,13 @@ $ bbgurl http://whatismyip.nodejitsu.com/index.json
 ```
 $ bbgurl http://whatismyip.jit.su -H '{ "accept": "application/json" }'
 { "ip": "71.198.76.200" }
+```
+
+### Do some basic auth
+
+```
+$ bbgurl -u josh:supersekritpw http://localhost:8080
+{ "success": true, "message": "Welcome to the inner sanctum." }
 ```
 
 ### Download a tarball
