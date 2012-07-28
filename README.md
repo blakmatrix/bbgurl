@@ -11,23 +11,23 @@
 ## Usage:
 
 ```
-$ bbgurl
+$ bbgurl 
 bbgurl: A tiny cli http client; a thin wrapper around mikeal/request. Named by @blakmatrix.
 
 USAGE: bbgurl <url> [<options>]
 
 Options:
-  --body, -d            String body for http request.                      
-  --followRedirect      Follow the first http 30x redirect (if any).         [boolean]  [default: true]
-  --followAllRedirects  Follow *all* http 30x redirects (if any).            [boolean]  [default: false]
-  --headers, -H         A JSON representation of any headers.              
-  --logfile             Optional file to write logs to.                    
-  --method, -X          HTTP method.                                         [default: "GET"]
-  --output, -o          HTTP response output file (default stdout)         
-  --pretty, -p          Pretty prints json responses
-  --strictSSL           Require that SSL certificates be valid.              [boolean]  [default: false]
-  --user, -u            Specify basic auth credentials (ex: `-u user:pass`)
-  --verbose, -v         Output logs to stderr.                               [boolean]
+  --body, -d            String body for http request.                             
+  --followRedirect      Follow the first http 30x redirect (if any).                [boolean]  [default: true]
+  --followAllRedirects  Follow *all* http 30x redirects (if any).                   [boolean]  [default: false]
+  --headers, -H         A JSON representation of any headers.                       [default: {}]
+  --logfile             Optional file to write logs to.                           
+  --method, -X          HTTP method.                                                [default: "GET"]
+  --output, -o          HTTP response output file (stdout if not specified)       
+  --pretty, -p          Attempt to reformat JSON chunks in a human-readable format  [boolean]  [default: false]
+  --strictSSL           Require that SSL certificates be valid.                     [boolean]  [default: false]
+  --user, -u            Specify basic auth credentials (ex: `-u user:pass`)       
+  --verbose, -v         Output logs to stderr.                                      [boolean]
 
 Argument check failed: Must specify a uri.
 ```
