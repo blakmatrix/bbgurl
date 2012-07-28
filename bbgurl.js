@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 var optimist = require('optimist'),
+    http = require('http'),
     fs = require('fs'),
     path = require('path'),
     util = require('util'),
@@ -11,7 +12,8 @@ var optimist = require('optimist'),
     request,
     uri,
     output,
-    prettyPipe;
+    prettyPipe,
+    req;
 
 // Parse arguments.
 argv = optimist
@@ -39,6 +41,12 @@ argv = optimist
       alias: 'H',
       default: {},
       describe: 'A JSON representation of any headers.'
+    },
+    'include': {
+      alias: 'i',
+      boolean: true,
+      default: false,
+      describe: 'Print the response headers.'
     },
     'logfile': {
       describe: 'Optional file to write logs to.'
@@ -170,4 +178,35 @@ prettyPipe.end = function (data) {
 };
 
 // meat and potatoes.
-request(argv).pipe(argv.pretty ? prettyPipe : output);
+req = request(argv);
+req.pipe(argv.pretty ? prettyPipe : output);
+
+// if --include, print the response headers.
+// I couldn't actually find the raw response headers,
+// so I do some finagling to rebuild them here.
+if (argv.include) {
+  req.on('response', function (res) {
+    write('HTTP/%s %d %s',
+      res.httpVersion,
+      res.statusCode,
+      http.STATUS_CODES[res.statusCode]
+    );
+
+    Object.keys(res.headers).forEach(function (k) {
+      write('%s: %s', upperCase(k), res.headers[k]);
+    });
+
+    write();
+
+    function write() {
+      output.write(util.format.apply(null, arguments) + '\r\n');
+    }
+
+    function upperCase(key) {
+      return key.split('-').map(function (w) {
+        return w.substr(0, 1).toUpperCase() + w.substr(1);
+      }).join('-');
+    }
+
+  });
+}
