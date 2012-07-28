@@ -123,6 +123,9 @@ request = require('request');
 
 // Handle the uri argument, attach to argv.
 uri = url.parse(argv.uri || argv._.join(' '));
+if(!uri.protocol){
+  uri = url.parse('http://' + uri.href);
+}
 
 if (argv.user) {
   uri.auth = argv.user;
