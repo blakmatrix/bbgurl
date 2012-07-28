@@ -17,7 +17,7 @@ var optimist = require('optimist'),
     output,
     prettyPipe,
     req,
-    speedometer, expected;
+    speedometer, total, expected;
 
 // Parse arguments.
 argv = optimist
@@ -199,8 +199,10 @@ if (argv.verbose) {
   speedometer = new Speedometer();
 
   req.on('response', function (response) {
-    expected = response.headers['content-length'] * 8;
+    expected = response.headers['content-length'];
   });
+
+  total = 0;
 
   // Create a progress bar.
   createBar({
@@ -220,9 +222,10 @@ if (argv.verbose) {
   }, function (bar, done) {
 
     req.on('data', function (data) {
+      total += data.length;
       speedometer.update(data, null, function (bps, avg) {
         var percentage = expected
-          ? speedometer.total / expected
+          ? total / expected
           : 0
         ;
 
@@ -239,7 +242,7 @@ if (argv.verbose) {
         bar.percent(percentage, util.format(
           '%d% (%s/%s, %s/sec)',
            percentage,
-           streamspeed.toHuman(speedometer.total),
+           streamspeed.toHuman(total),
            streamspeed.toHuman(expected),
            streamspeed.toHuman(bps)
         ));
@@ -250,7 +253,7 @@ if (argv.verbose) {
       // Set the bar to 100%.
       bar.percent(100, util.format(
         '100% (%s/%s)                    ',
-         streamspeed.toHuman(expected),
+         streamspeed.toHuman(total),
          streamspeed.toHuman(expected)
       ));
 
