@@ -225,7 +225,7 @@ if (argv.verbose) {
       total += data.length;
       speedometer.update(data, null, function (bps, avg) {
         var percentage = expected
-          ? total / expected
+          ? 100 * total / expected
           : 0
         ;
 
